@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lọc & Rút gọn Link Group Facebook</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      margin-top: 40px;
+      color: #1a73e8;
+    }
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      height: 200px;
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      resize: vertical;
+      font-size: 15px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      background: #1a73e8;
+      color: white;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #0c56c2;
+    }
+    .output {
+      width: 90%;
+      max-width: 600px;
+      background: white;
+      margin-top: 30px;
+      padding: 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      word-wrap: break-word;
+    }
+    .output a {
+      display: block;
+      color: #1a73e8;
+      text-decoration: none;
+      margin: 5px 0;
+    }
+    .output a:hover {
+      text-decoration: underline;
+    }
+    .copy-btn {
+      background: #28a745;
+      margin-left: 10px;
+    }
+    .copy-btn:hover {
+      background: #218838;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lọc & Rút gọn Link Group Facebook by Tống Trần Kiên</h1>
+  <textarea id="inputLinks" placeholder="Nhập danh sách link Facebook, mỗi link 1 dòng..."></textarea>
+  <div>
+    <button onclick="filterGroupLinks()">Lọc link group</button>
+    <button class="copy-btn" onclick="copyOutput()">Copy kết quả</button>
+  </div>
+  <div class="output" id="output"></div>
+
+  <script>
+    function filterGroupLinks() {
+      const input = document.getElementById("inputLinks").value.trim();
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      if (!input) {
+        output.innerHTML = "<p style='color:red'>Vui lòng nhập danh sách link trước.</p>";
+        return;
+      }
+
+      const lines = input.split(/\r?\n/);
+      const regex = /^https?:\/\/(www\.)?facebook\.com\/groups\/([^/?#]+)(?:\/|$)/i;
+      const groupSet = new Set(); // tránh trùng lặp
+
+      for (let line of lines) {
+        line = line.trim();
+        const match = line.match(regex);
+        if (match) {
+          const groupUrl = `https://www.facebook.com/groups/${match[2]}`;
+          groupSet.add(groupUrl);
+        }
+      }
+
+      const groupLinks = Array.from(groupSet);
+
+      if (groupLinks.length === 0) {
+        output.innerHTML = "<p style='color:gray'>Không tìm thấy link group nào.</p>";
+        return;
+      }
+
+      const html = groupLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join("");
+      output.innerHTML = html;
+    }
+
+    function copyOutput() {
+      const output = document.getElementById("output");
+      const links = [...output.querySelectorAll("a")].map(a => a.href).join("\n");
+      if (!links) {
+        alert("Không có link nào để copy!");
+        return;
+      }
+      navigator.clipboard.writeText(links).then(() => {
+        alert("✅ Đã copy kết quả vào clipboard!");
+      });
+    }
+  </script>
+</body>
+</html>
