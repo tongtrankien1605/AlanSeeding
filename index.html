@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lọc & Rút gọn Link Group Facebook</title>
+  <title>Lọc & So sánh Link Group Facebook</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -17,14 +17,15 @@
       min-height: 100vh;
     }
     h1 {
-      margin-top: 40px;
+      margin-top: 30px;
       color: #1a73e8;
+      text-align: center;
     }
     textarea {
       width: 90%;
       max-width: 600px;
-      height: 200px;
-      margin-top: 20px;
+      height: 150px;
+      margin-top: 10px;
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 6px;
@@ -32,7 +33,7 @@
       font-size: 15px;
     }
     button {
-      margin-top: 20px;
+      margin-top: 15px;
       padding: 10px 20px;
       font-size: 16px;
       border: none;
@@ -45,21 +46,21 @@
     button:hover {
       background: #0c56c2;
     }
-    .output {
+    .section {
       width: 90%;
-      max-width: 600px;
+      max-width: 650px;
       background: white;
       margin-top: 30px;
-      padding: 15px;
+      padding: 20px;
       border-radius: 6px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      word-wrap: break-word;
     }
     .output a {
       display: block;
       color: #1a73e8;
       text-decoration: none;
-      margin: 5px 0;
+      margin: 3px 0;
+      word-break: break-all;
     }
     .output a:hover {
       text-decoration: underline;
@@ -71,18 +72,61 @@
     .copy-btn:hover {
       background: #218838;
     }
+    .compare-section {
+      width: 90%;
+      max-width: 650px;
+      background: white;
+      margin-top: 30px;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .result-title {
+      font-weight: bold;
+      margin-top: 15px;
+      color: #555;
+    }
   </style>
 </head>
 <body>
-  <h1>Lọc & Rút gọn Link Group Facebook by Tống Trần Kiên</h1>
-  <textarea id="inputLinks" placeholder="Nhập danh sách link Facebook, mỗi link 1 dòng..."></textarea>
-  <div>
-    <button onclick="filterGroupLinks()">Lọc link group</button>
-    <button class="copy-btn" onclick="copyOutput()">Copy kết quả</button>
+  <h1>Lọc & So sánh Link Group Facebook</h1>
+
+  <!-- PHẦN 1: LỌC LINK GROUP -->
+  <div class="section">
+    <h2>1️⃣ Lọc link group từ danh sách link Facebook</h2>
+    <textarea id="inputLinks" placeholder="Nhập danh sách link Facebook, mỗi link 1 dòng..."></textarea>
+    <div>
+      <button onclick="filterGroupLinks()">Lọc link group</button>
+      <button class="copy-btn" onclick="copyOutput()">Copy kết quả</button>
+    </div>
+    <div class="output" id="output"></div>
   </div>
-  <div class="output" id="output"></div>
+
+  <!-- PHẦN 2: SO SÁNH 2 DANH SÁCH -->
+  <div class="compare-section">
+    <h2>2️⃣ So sánh danh sách group đã tham gia và group mới</h2>
+
+    <p><b>A:</b> Nhập danh sách group bạn đã tham gia</p>
+    <textarea id="joinedGroups" placeholder="Nhập danh sách group đã tham gia, mỗi link 1 dòng..."></textarea>
+
+    <p><b>B:</b> Nhập danh sách group mới lọc được</p>
+    <textarea id="newGroups" placeholder="Nhập danh sách group mới lọc được, mỗi link 1 dòng..."></textarea>
+
+    <button onclick="compareGroups()">So sánh danh sách</button>
+
+    <div class="result-title">✅ Đã tham gia (trùng A & B):</div>
+    <div class="output" id="matchedOutput"></div>
+
+    <div class="result-title">🚫 Chưa tham gia (có trong B nhưng không có trong A):</div>
+    <div class="output" id="unjoinedOutput"></div>
+  </div>
 
   <script>
+    // ----- LỌC LINK GROUP -----
     function filterGroupLinks() {
       const input = document.getElementById("inputLinks").value.trim();
       const output = document.getElementById("output");
@@ -95,7 +139,7 @@
 
       const lines = input.split(/\r?\n/);
       const regex = /^https?:\/\/(www\.)?facebook\.com\/groups\/([^/?#]+)(?:\/|$)/i;
-      const groupSet = new Set(); // tránh trùng lặp
+      const groupSet = new Set();
 
       for (let line of lines) {
         line = line.trim();
@@ -107,7 +151,6 @@
       }
 
       const groupLinks = Array.from(groupSet);
-
       if (groupLinks.length === 0) {
         output.innerHTML = "<p style='color:gray'>Không tìm thấy link group nào.</p>";
         return;
@@ -117,6 +160,7 @@
       output.innerHTML = html;
     }
 
+    // ----- COPY KẾT QUẢ -----
     function copyOutput() {
       const output = document.getElementById("output");
       const links = [...output.querySelectorAll("a")].map(a => a.href).join("\n");
@@ -127,6 +171,33 @@
       navigator.clipboard.writeText(links).then(() => {
         alert("✅ Đã copy kết quả vào clipboard!");
       });
+    }
+
+    // ----- SO SÁNH 2 DANH SÁCH -----
+    function compareGroups() {
+      const joined = document.getElementById("joinedGroups").value.trim().split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+      const newOnes = document.getElementById("newGroups").value.trim().split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+
+      const joinedSet = new Set(joined);
+      const matched = [];
+      const unjoined = [];
+
+      for (const link of newOnes) {
+        if (joinedSet.has(link)) matched.push(link);
+        else unjoined.push(link);
+      }
+
+      // Hiển thị kết quả
+      const matchedOutput = document.getElementById("matchedOutput");
+      const unjoinedOutput = document.getElementById("unjoinedOutput");
+
+      matchedOutput.innerHTML = matched.length
+        ? matched.map(l => `<a href="${l}" target="_blank">${l}</a>`).join("")
+        : "<p style='color:gray'>Không có link trùng.</p>";
+
+      unjoinedOutput.innerHTML = unjoined.length
+        ? unjoined.map(l => `<a href="${l}" target="_blank">${l}</a>`).join("")
+        : "<p style='color:gray'>Không có link mới chưa tham gia.</p>";
     }
   </script>
 </body>
