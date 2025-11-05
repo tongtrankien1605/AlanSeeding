@@ -95,7 +95,6 @@
 <body>
   <h1>Lọc & So sánh Link Group Facebook</h1>
 
-  <!-- PHẦN 1: LỌC LINK GROUP -->
   <div class="section">
     <h2>1️⃣ Lọc link group từ danh sách link Facebook</h2>
     <textarea id="inputLinks" placeholder="Nhập danh sách link Facebook, mỗi link 1 dòng..."></textarea>
@@ -106,7 +105,6 @@
     <div class="output" id="output"></div>
   </div>
 
-  <!-- PHẦN 2: SO SÁNH 2 DANH SÁCH -->
   <div class="compare-section">
     <h2>2️⃣ So sánh danh sách group đã tham gia và group mới</h2>
 
@@ -126,7 +124,16 @@
   </div>
 
   <script>
-    // ----- LỌC LINK GROUP -----
+    // --- Hàm chuẩn hóa link ---
+    function normalizeLink(url) {
+      if (!url) return "";
+      url = url.trim().toLowerCase();
+      // Bỏ dấu "/" cuối
+      if (url.endsWith("/")) url = url.slice(0, -1);
+      return url;
+    }
+
+    // --- Lọc link group ---
     function filterGroupLinks() {
       const input = document.getElementById("inputLinks").value.trim();
       const output = document.getElementById("output");
@@ -142,10 +149,9 @@
       const groupSet = new Set();
 
       for (let line of lines) {
-        line = line.trim();
-        const match = line.match(regex);
+        const match = line.trim().match(regex);
         if (match) {
-          const groupUrl = `https://www.facebook.com/groups/${match[2]}`;
+          const groupUrl = normalizeLink(`https://www.facebook.com/groups/${match[2]}`);
           groupSet.add(groupUrl);
         }
       }
@@ -156,11 +162,10 @@
         return;
       }
 
-      const html = groupLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join("");
-      output.innerHTML = html;
+      output.innerHTML = groupLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join("");
     }
 
-    // ----- COPY KẾT QUẢ -----
+    // --- Copy kết quả ---
     function copyOutput() {
       const output = document.getElementById("output");
       const links = [...output.querySelectorAll("a")].map(a => a.href).join("\n");
@@ -173,10 +178,10 @@
       });
     }
 
-    // ----- SO SÁNH 2 DANH SÁCH -----
+    // --- So sánh 2 danh sách ---
     function compareGroups() {
-      const joined = document.getElementById("joinedGroups").value.trim().split(/\r?\n/).map(x => x.trim()).filter(Boolean);
-      const newOnes = document.getElementById("newGroups").value.trim().split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+      const joined = document.getElementById("joinedGroups").value.trim().split(/\r?\n/).map(normalizeLink).filter(Boolean);
+      const newOnes = document.getElementById("newGroups").value.trim().split(/\r?\n/).map(normalizeLink).filter(Boolean);
 
       const joinedSet = new Set(joined);
       const matched = [];
@@ -187,7 +192,6 @@
         else unjoined.push(link);
       }
 
-      // Hiển thị kết quả
       const matchedOutput = document.getElementById("matchedOutput");
       const unjoinedOutput = document.getElementById("unjoinedOutput");
 
