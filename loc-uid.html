@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="vi">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>K2</title>
+
+        <style>
+            body {
+                margin: 0;
+                font-family: Inter, system-ui, sans-serif;
+                background: #0d1117;
+                color: #e6edf3;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 30px auto;
+                background: #161b22;
+                padding: 20px;
+                border-radius: 12px;
+                box-shadow: 0 0 20px rgba(0, 0, 0, 0.35);
+            }
+
+            h1 {
+                text-align: center;
+                font-size: 22px;
+                margin-bottom: 10px;
+            }
+            p {
+                text-align: center;
+                color: #9da5b4;
+                margin-bottom: 20px;
+            }
+
+            textarea {
+                width: 100%;
+                min-height: 140px;
+                padding: 12px;
+                background: #0d1117;
+                border: 1px solid #30363d;
+                border-radius: 8px;
+                color: #e6edf3;
+                resize: vertical;
+                font-family: monospace;
+                font-size: 14px;
+            }
+
+            .label-area {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 12px;
+            }
+            
+            .btn-area {
+                display: flex;
+                gap: 8px;
+                margin-top: 12px;
+            }
+
+            button {
+                padding: 10px 16px;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 14px;
+                transition: background 0.2s;
+            }
+
+            .btn-primary {
+                background: #238636;
+                color: #fff;
+            }
+
+            .btn-secondary {
+                background: #30363d;
+                color: #e6edf3;
+            }
+            
+            .btn-secondary:hover, .back-home:hover {
+                background: #444c56;
+            }
+            
+            .btn-primary:hover {
+                background: #2ea043;
+            }
+
+            .result-box {
+                margin-top: 20px;
+                background: #0d1117;
+                padding: 15px;
+                border-radius: 10px;
+                border: 1px solid #21262d;
+            }
+
+            .stat {
+                display: inline-block;
+                background: #161b22;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 13px;
+                margin-right: 6px;
+                border: 1px solid #30363d;
+            }
+
+            .results-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                margin-top: 20px;
+            }
+
+            .result-section {
+                background: #0d1117;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #21262d;
+            }
+
+            .result-section h3 {
+                margin-top: 0;
+                font-size: 16px;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+
+            .uid-list {
+                padding: 5px;
+                min-height: 80px;
+                max-height: 250px;
+                overflow-y: auto;
+            }
+
+            .uid-item {
+                display: inline-block;
+                padding: 4px 8px;
+                margin: 4px;
+                border-radius: 6px;
+                font-size: 13px;
+                line-height: 1.5;
+                word-break: break-all;
+                
+                /* Style mặc định cho UID không trùng */
+                background: #21262d; 
+                color: #e6edf3;
+                font-weight: 400;
+            }
+
+            /* MÀU HIGHLIGHT CHO UID TRÙNG NHAU (DUP) */
+            .uid-item.dup {
+                background: #04d646; /* Màu vàng */
+                color: #071124;
+                font-weight: 700;
+            }
+            
+            .top-menu {
+                margin-bottom: 15px;
+            }
+
+            .back-home {
+                display: inline-block;
+                padding: 8px 12px;
+                background: #30363d;
+                color: #fff;
+                border-radius: 6px;
+                text-decoration: none;
+                font-size: 13px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="top-menu">
+                <a href="index.html" class="back-home">← Trang chủ</a>
+            </div>
+
+            <h1>So sánh UID Facebook – Highlight UID Trùng</h1>
+            <p>Dán 2 danh sách UID vào 2 ô. Các UID trùng nhau sẽ được **highlight màu vàng** trong danh sách A và B.</p>
+
+            <label>Danh sách A</label>
+            <textarea id="inputA" placeholder="Mỗi UID 1 dòng hoặc ngăn cách bởi dấu phẩy..."></textarea>
+
+            <label class="label-area">
+                Danh sách B
+                <select id="mode" class="btn-secondary" style="padding: 8px; margin-left: auto; width: auto">
+                    <option value="exact">So sánh chính xác (UID)</option>
+                    <option value="numeric">Lọc chỉ giữ số</option>
+                </select>
+            </label>
+            <textarea id="inputB" placeholder="Nhập danh sách B..."></textarea>
+
+            <div class="btn-area">
+                <button class="btn-primary" id="compareBtn">So sánh</button>
+                <button class="btn-secondary" id="clearBtn">Xóa</button>
+                <button class="btn-secondary" id="swapBtn">Đổi A ↔ B</button>
+            </div>
+
+            <div class="result-box">
+                <div style="margin-bottom: 15px;">
+                    <span class="stat">
+                        A:
+                        <span id="countA">0</span>
+                    </span>
+                    <span class="stat">
+                        B:
+                        <span id="countB">0</span>
+                    </span>
+                    <span class="stat">
+                        Trùng:
+                        <span id="countDup">0</span>
+                    </span>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-section">
+                        <h3>Danh sách A</h3>
+                        <div id="listA" class="uid-list"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>Danh sách B</h3>
+                        <div id="listB" class="uid-list"></div>
+                    </div>
+
+                    <div class="result-section">
+                        <h3>UID Trùng nhau</h3>
+                        <div id="listDup" class="uid-list"></div>
+                    </div>
+                </div>
+
+                <div class="btn-area" style="margin-top: 15px; justify-content: space-between;">
+                    <button class="btn-primary" id="copyDup">Sao chép UID trùng</button>
+                    <button class="btn-secondary" id="downloadAll">Tải tất cả (.txt)</button>
+                </div>
+                <p style="margin-top: 10px; font-size: 12px; color: #6e7681; text-align: left;">
+                    Kết quả đã chuẩn hóa (bỏ trùng nội bộ mỗi danh sách).
+                </p>
+            </div>
+        </div>
+
+        <script>
+            function parseUIDs(raw, mode) {
+                if (!raw) return [];
+                const parts = raw
+                    .split(/[,;\n\r\t\s]+/)
+                    .map((s) => s.trim())
+                    .filter(Boolean);
+
+                if (mode === "numeric") {
+                    return parts.map((s) => (s.match(/\d+/g) || []).join("")).filter(Boolean);
+                }
+                return parts;
+            }
+
+            function uniqueArray(arr) {
+                const set = new Set();
+                const out = [];
+                for (const x of arr) {
+                    if (!set.has(x)) {
+                        set.add(x);
+                        out.push(x);
+                    }
+                }
+                return out;
+            }
+
+            function compare() {
+                const rawA = document.getElementById("inputA").value;
+                const rawB = document.getElementById("inputB").value;
+                const mode = document.getElementById("mode").value;
+
+                // Lấy danh sách UID duy nhất (đã lọc trùng nội bộ)
+                const a = uniqueArray(parseUIDs(rawA, mode));
+                const b = uniqueArray(parseUIDs(rawB, mode));
+
+                const setB = new Set(b);
+                const setA = new Set(a);
+
+                // 1. UID trùng nhau (có trong cả A và B)
+                const dup = a.filter((x) => setB.has(x));
+                const dupUnique = uniqueArray(dup);
+                const setDup = new Set(dupUnique);
+
+                // Cập nhật thống kê
+                document.getElementById("countA").textContent = a.length;
+                document.getElementById("countB").textContent = b.length;
+                document.getElementById("countDup").textContent = dupUnique.length;
+
+                // Hiển thị toàn bộ UID A và B, highlight UID trùng
+                renderFullList("listA", a, setDup);
+                renderFullList("listB", b, setDup);
+                
+                // Hiển thị danh sách trùng nhau riêng biệt
+                renderDupList("listDup", dupUnique);
+            }
+
+            /**
+             * Hiển thị toàn bộ UID trong danh sách và highlight các UID trùng.
+             * @param {string} id - ID của element (listA/listB).
+             * @param {Array<string>} arr - Danh sách UID đầy đủ (đã unique nội bộ).
+             * @param {Set<string>} setDup - Set chứa các UID trùng nhau để check highlight.
+             */
+            function renderFullList(id, arr, setDup) {
+                const box = document.getElementById(id);
+                box.innerHTML = "";
+
+                if (arr.length === 0) {
+                    box.innerHTML = `<i style="color:#9da5b4">Không có dữ liệu</i>`;
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+                arr.forEach((uid) => {
+                    const el = document.createElement("span");
+                    el.className = "uid-item";
+                    if (setDup.has(uid)) {
+                        el.classList.add("dup"); // Thêm class highlight
+                    }
+                    el.textContent = uid;
+                    fragment.appendChild(el);
+                });
+                box.appendChild(fragment);
+            }
+
+             /**
+             * Hiển thị danh sách UID trùng nhau (chỉ dùng cho cột Trùng nhau).
+             */
+            function renderDupList(id, arr) {
+                const box = document.getElementById(id);
+                box.innerHTML = "";
+
+                if (arr.length === 0) {
+                    box.innerHTML = `<i style="color:#9da5b4">Không có dữ liệu</i>`;
+                    return;
+                }
+
+                const fragment = document.createDocumentFragment();
+                arr.forEach((uid) => {
+                    const el = document.createElement("span");
+                    el.className = "uid-item dup";
+                    el.textContent = uid;
+                    fragment.appendChild(el);
+                });
+                box.appendChild(fragment);
+            }
+            
+            function downloadText(filename, text) {
+                const blob = new Blob([text], { type: "text/plain" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            
+            // Đính kèm sự kiện
+            document.getElementById("compareBtn").onclick = compare;
+
+            document.getElementById("clearBtn").onclick = () => {
+                document.getElementById("inputA").value = "";
+                document.getElementById("inputB").value = "";
+                compare();
+            };
+
+            document.getElementById("swapBtn").onclick = () => {
+                let a = document.getElementById("inputA").value;
+                document.getElementById("inputA").value = document.getElementById("inputB").value;
+                document.getElementById("inputB").value = a;
+                compare();
+            };
+
+            document.getElementById("copyDup").onclick = () => {
+                const items = document.querySelectorAll("#listDup .uid-item");
+                const arr = [...items].map((e) => e.textContent);
+                if (arr.length === 0) return alert("Không có UID trùng!");
+
+                navigator.clipboard.writeText(arr.join("\n"));
+                alert("Đã copy " + arr.length + " UID trùng.");
+            };
+
+            document.getElementById("downloadAll").onclick = () => {
+                const aItems = [...document.querySelectorAll("#listA .uid-item")].map((e) => e.textContent);
+                const bItems = [...document.querySelectorAll("#listB .uid-item")].map((e) => e.textContent);
+                const dupItems = [...document.querySelectorAll("#listDup .uid-item")].map((e) => e.textContent);
+                
+                if (aItems.length + bItems.length + dupItems.length === 0) return alert("Không có UID nào để tải.");
+
+                const content = 
+`--- DANH SÁCH A (${aItems.length}) ---
+${aItems.join("\n")}
+
+--- DANH SÁCH B (${bItems.length}) ---
+${bItems.join("\n")}
+
+--- UID TRÙNG NHAU (${dupItems.length}) ---
+${dupItems.join("\n")}`;
+
+                downloadText("ket_qua_loc_uid.txt", content);
+            };
+
+            // Tự động so sánh khi nhập
+            ["inputA", "inputB", "mode"].forEach((id) => {
+                document.getElementById(id).addEventListener("input", () => {
+                    clearTimeout(window.__timer);
+                    window.__timer = setTimeout(compare, 400);
+                });
+            });
+
+            // So sánh lần đầu khi tải trang
+            compare();
+        </script>
+    </body>
+</html>

@@ -1,208 +1,64 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lọc & So sánh Link Group Facebook</title>
-  <style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALAN SEEDING by Tống Trần Kiên</title>
+<style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #4facfe, #00f2fe);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        animation: fadeIn 1s ease-in-out;
+    }
+    @keyframes fadeIn {
+        from {opacity: 0;}
+        to {opacity: 1;}
+    }
+    .container {
+        text-align: center;
     }
     h1 {
-      margin-top: 30px;
-      color: #1a73e8;
-      text-align: center;
+        font-size: 32px;
+        margin-bottom: 20px;
     }
-    textarea {
-      width: 90%;
-      max-width: 600px;
-      height: 150px;
-      margin-top: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      resize: vertical;
-      font-size: 15px;
+    .btn {
+        display: block;
+        width: 250px;
+        margin: 10px auto;
+        padding: 15px;
+        border: none;
+        border-radius: 8px;
+        font-size: 18px;
+        cursor: pointer;
+        background: white;
+        color: #333;
+        transition: 0.3s;
     }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #1a73e8;
-      color: white;
-      transition: 0.3s;
+    .btn:hover {
+        background: #ffcc00;
+        transform: scale(1.05);
     }
-    button:hover {
-      background: #0c56c2;
-    }
-    .section {
-      width: 90%;
-      max-width: 650px;
-      background: white;
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    .output a {
-      display: block;
-      color: #1a73e8;
-      text-decoration: none;
-      margin: 3px 0;
-      word-break: break-all;
-    }
-    .output a:hover {
-      text-decoration: underline;
-    }
-    .copy-btn {
-      background: #28a745;
-      margin-left: 10px;
-    }
-    .copy-btn:hover {
-      background: #218838;
-    }
-    .compare-section {
-      width: 90%;
-      max-width: 650px;
-      background: white;
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 6px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h2 {
-      color: #333;
-      margin-bottom: 10px;
-    }
-    .result-title {
-      font-weight: bold;
-      margin-top: 15px;
-      color: #555;
-    }
-  </style>
+</style>
 </head>
 <body>
-  <h1>Lọc & So sánh Link Group Facebook</h1>
 
-  <div class="section">
-    <h2>1️⃣ Lọc link group từ danh sách link Facebook</h2>
-    <textarea id="inputLinks" placeholder="Nhập danh sách link Facebook, mỗi link 1 dòng..."></textarea>
-    <div>
-      <button onclick="filterGroupLinks()">Lọc link group</button>
-      <button class="copy-btn" onclick="copyOutput()">Copy kết quả</button>
-    </div>
-    <div class="output" id="output"></div>
-  </div>
+<div class="container">
+    <h1>✨ Alan Seeding – Tống Trần Kiên</h1>
 
-  <div class="compare-section">
-    <h2>2️⃣ So sánh danh sách group đã tham gia và group mới</h2>
+    <button class="btn" onclick="location.href='loc-link.html'">
+        🔍 Lọc & So sánh Link Group
+    </button>
 
-    <p><b>A:</b> Nhập danh sách group bạn đã tham gia</p>
-    <textarea id="joinedGroups" placeholder="Nhập danh sách group đã tham gia, mỗi link 1 dòng..."></textarea>
+    <button class="btn" onclick="location.href='loc-uid.html'">
+        👤 Lọc UID Trùng Nhau
+    </button>
+</div>
 
-    <p><b>B:</b> Nhập danh sách group mới lọc được</p>
-    <textarea id="newGroups" placeholder="Nhập danh sách group mới lọc được, mỗi link 1 dòng..."></textarea>
-
-    <button onclick="compareGroups()">So sánh danh sách</button>
-
-    <div class="result-title">✅ Đã tham gia (trùng A & B):</div>
-    <div class="output" id="matchedOutput"></div>
-
-    <div class="result-title">🚫 Chưa tham gia (có trong B nhưng không có trong A):</div>
-    <div class="output" id="unjoinedOutput"></div>
-  </div>
-
-  <script>
-    // --- Hàm chuẩn hóa link ---
-    function normalizeLink(url) {
-      if (!url) return "";
-      url = url.trim().toLowerCase();
-      // Bỏ dấu "/" cuối
-      if (url.endsWith("/")) url = url.slice(0, -1);
-      return url;
-    }
-
-    // --- Lọc link group ---
-    function filterGroupLinks() {
-      const input = document.getElementById("inputLinks").value.trim();
-      const output = document.getElementById("output");
-      output.innerHTML = "";
-
-      if (!input) {
-        output.innerHTML = "<p style='color:red'>Vui lòng nhập danh sách link trước.</p>";
-        return;
-      }
-
-      const lines = input.split(/\r?\n/);
-      const regex = /^https?:\/\/(www\.)?facebook\.com\/groups\/([^/?#]+)(?:\/|$)/i;
-      const groupSet = new Set();
-
-      for (let line of lines) {
-        const match = line.trim().match(regex);
-        if (match) {
-          const groupUrl = normalizeLink(`https://www.facebook.com/groups/${match[2]}`);
-          groupSet.add(groupUrl);
-        }
-      }
-
-      const groupLinks = Array.from(groupSet);
-      if (groupLinks.length === 0) {
-        output.innerHTML = "<p style='color:gray'>Không tìm thấy link group nào.</p>";
-        return;
-      }
-
-      output.innerHTML = groupLinks.map(link => `<a href="${link}" target="_blank">${link}</a>`).join("");
-    }
-
-    // --- Copy kết quả ---
-    function copyOutput() {
-      const output = document.getElementById("output");
-      const links = [...output.querySelectorAll("a")].map(a => a.href).join("\n");
-      if (!links) {
-        alert("Không có link nào để copy!");
-        return;
-      }
-      navigator.clipboard.writeText(links).then(() => {
-        alert("✅ Đã copy kết quả vào clipboard!");
-      });
-    }
-
-    // --- So sánh 2 danh sách ---
-    function compareGroups() {
-      const joined = document.getElementById("joinedGroups").value.trim().split(/\r?\n/).map(normalizeLink).filter(Boolean);
-      const newOnes = document.getElementById("newGroups").value.trim().split(/\r?\n/).map(normalizeLink).filter(Boolean);
-
-      const joinedSet = new Set(joined);
-      const matched = [];
-      const unjoined = [];
-
-      for (const link of newOnes) {
-        if (joinedSet.has(link)) matched.push(link);
-        else unjoined.push(link);
-      }
-
-      const matchedOutput = document.getElementById("matchedOutput");
-      const unjoinedOutput = document.getElementById("unjoinedOutput");
-
-      matchedOutput.innerHTML = matched.length
-        ? matched.map(l => `<a href="${l}" target="_blank">${l}</a>`).join("")
-        : "<p style='color:gray'>Không có link trùng.</p>";
-
-      unjoinedOutput.innerHTML = unjoined.length
-        ? unjoined.map(l => `<a href="${l}" target="_blank">${l}</a>`).join("")
-        : "<p style='color:gray'>Không có link mới chưa tham gia.</p>";
-    }
-  </script>
 </body>
 </html>
